@@ -36,7 +36,10 @@ type ReasonResponse = {
 };
 
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, init);
+  const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "";
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const url = baseUrl ? `${baseUrl}${normalizedPath}` : normalizedPath;
+  const res = await fetch(url, init);
   if (!res.ok) {
     const text = await res.text();
     throw new Error(text || res.statusText);
