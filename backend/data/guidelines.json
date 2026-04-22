@@ -1,0 +1,41 @@
+{
+  "topic": "Thalassemia — emergency and acute care (knowledge base)",
+  "disclaimer": "Educational prototype only. Not medical advice. Clinicians must follow local protocols and official WHO guidance.",
+  "who_pdf_links": [
+    {
+      "title": "WHO — Management of haemoglobin disorders (overview)",
+      "url": "https://www.who.int/publications/i/item/9789241594046"
+    },
+    {
+      "title": "WHO IRIS repository (search: thalassemia, transfusion, blood safety)",
+      "url": "https://iris.who.int/browse?type=author&value=World+Health+Organization"
+    },
+    {
+      "title": "WHO — Blood transfusion safety (policy resources)",
+      "url": "https://www.who.int/teams/health-product-policy-and-standards/availability-safe-quality-assured-blood-and-blood-products"
+    }
+  ],
+  "structured_rules": [
+    {
+      "id": "T-EM-01",
+      "category": "Red flag — seek emergency care",
+      "summary": "Suspected acute severe anemia or hemodynamic compromise in a known or suspected thalassemia patient.",
+      "signals": ["syncope", "rest dyspnea", "chest pain", "pallor with tachycardia", "Hb not available but clinical shock"],
+      "action": "Emergency evaluation, oxygen as indicated, IV access, labs including FBC and reticulocytes, consider transfusion per protocol."
+    },
+    {
+      "id": "T-EM-02",
+      "category": "Transfusion and iron overload",
+      "summary": "Chronic transfusion programs require monitoring for iron overload; acute presentations may overlap with infection or cardiac strain.",
+      "signals": ["known transfusion-dependent thalassemia", "missed chelation", "new edema or arrhythmia"],
+      "action": "Specialist review; evaluate cardiac and endocrine status per guideline pathways; do not change chelation without specialist input."
+    },
+    {
+      "id": "T-EM-03",
+      "category": "Infection / splenic considerations",
+      "summary": "Functional hyposplenism or splenectomy increases infection risk; fever can be an emergency in vulnerable patients.",
+      "signals": ["fever", "post-splenectomy", "functional asplenia"],
+      "action": "Sepsis pathway per local guideline; early antibiotics if indicated; notify hematology."
+    }
+  ]
+}
