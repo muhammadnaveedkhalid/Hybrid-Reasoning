@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     hf_dataset_config: str = "pqa_labeled"
     hf_dataset_split: str = "train"
     guideline_keywords: str = "thalassem,hemoglobin,transfusion,anemia,splen,chelation,iron overload,emergency"
+    frontend_urls: str = "http://localhost:5173,http://127.0.0.1:5173"
 
 
 settings = Settings()
