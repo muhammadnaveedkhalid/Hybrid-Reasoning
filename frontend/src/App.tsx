@@ -35,6 +35,23 @@ type ReasonResponse = {
   disclaimer: string;
 };
 
+type HealthResponse = {
+  status: string;
+  hf_dataset: string;
+};
+
+const CASE_TEMPLATES: string[] = [
+  "Transfusion-dependent thalassemia, fever 39°C, tachycardia, patient reports missed deferasirox for 2 weeks.",
+  "Known beta-thalassemia major with chest pain, dyspnea at rest, severe pallor, and near syncope in emergency triage.",
+  "Post-splenectomy thalassemia patient with fever, hypotension, and confusion. Concern for severe infection pathway.",
+];
+
+const ABSTRACT_HIGHLIGHTS: string[] = [
+  "AHP-TOPSIS + XGBoost pipeline reported high diagnostic classification accuracy in a Bangladesh maternal cohort.",
+  "Framework emphasizes explainability via SHAP and LIME to improve clinician trust and transparency.",
+  "Study frames the model as an assistive diagnostic classifier, not a causal predictor, requiring external validation.",
+];
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "";
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
@@ -49,18 +66,16 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 
 export default function App() {
   const [guidelines, setGuidelines] = useState<Guidelines | null>(null);
-  const [notes, setNotes] = useState(
-    "Transfusion-dependent thalassemia, fever 39°C, tachycardia, patient reports missed deferasirox for 2 weeks.",
-  );
+  const [notes, setNotes] = useState(CASE_TEMPLATES[0]);
   const [reason, setReason] = useState<ReasonResponse | null>(null);
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [apiHealth, setApiHealth] = useState<HealthResponse | null>(null);
 
   useEffect(() => {
-    fetchJson<Guidelines>("/api/guidelines")
-      .then(setGuidelines)
-      .catch((e: Error) => setError(e.message));
+    fetchJson<Guidelines>("/api/guidelines").then(setGuidelines).catch((e: Error) => setError(e.message));
+    fetchJson<HealthResponse>("/api/health").then(setApiHealth).catch(() => setApiHealth(null));
   }, []);
 
   const runReason = useCallback(async () => {
@@ -102,6 +117,11 @@ export default function App() {
           Rule layer (WHO-linked references and red-flag cards) combined with live rows from a Hugging Face
           dataset stream (default: PubMedQA). Educational prototype only.
         </p>
+        <div className="status-row">
+          <span className={`chip ${apiHealth ? "ok" : "warn"}`}>{apiHealth ? "API connected" : "API not connected"}</span>
+          <span className="chip">Dataset: {apiHealth?.hf_dataset ?? "unknown"}</span>
+          <span className="chip">Mode: Hybrid (rules + retrieval)</span>
+        </div>
       </header>
 
       {error ? <div className="banner error">{error}</div> : null}
@@ -121,6 +141,16 @@ export default function App() {
             rows={6}
             spellCheck={false}
           />
+          <div className="templates">
+            {CASE_TEMPLATES.map((template, index) => (
+              <button key={template} type="button" className="btn ghost" onClick={() => setNotes(template)}>
+                Sample case {index + 1}
+              </button>
+            ))}
+            <button type="button" className="btn ghost" onClick={() => setNotes("")}>
+              Clear
+            </button>
+          </div>
           {reason ? (
             <div className="reason-out">
               <div className="scores">
@@ -135,6 +165,26 @@ export default function App() {
                 <div>
                   <span className="label">Evidence strength</span>
                   <span className="value">{reason.evidence_strength}</span>
+                </div>
+              </div>
+              <div className="meters">
+                <div>
+                  <span className="label">Hybrid confidence</span>
+                  <div className="meter-track">
+                    <div className="meter-fill" style={{ width: `${Math.round(reason.hybrid_score * 100)}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <span className="label">Rule signal</span>
+                  <div className="meter-track">
+                    <div className="meter-fill rule" style={{ width: `${Math.round(reason.rule_strength * 100)}%` }} />
+                  </div>
+                </div>
+                <div>
+                  <span className="label">Evidence signal</span>
+                  <div className="meter-track">
+                    <div className="meter-fill evidence" style={{ width: `${Math.round(reason.evidence_strength * 100)}%` }} />
+                  </div>
                 </div>
               </div>
               <p className="narrative">{reason.narrative}</p>
@@ -179,6 +229,18 @@ export default function App() {
             ))}
           </ul>
           {!evidence.length ? <p className="muted small">Press “Next batch” to pull evidence.</p> : null}
+        </div>
+
+        <div className="card">
+          <h2>Research abstract highlights</h2>
+          <p className="muted small">
+            Extracted from your added abstract PDF for quick orientation while testing emergency scenarios.
+          </p>
+          <ul className="bullet-list">
+            {ABSTRACT_HIGHLIGHTS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
         </div>
 
         <div className="card span-3">
